@@ -1,8 +1,8 @@
 package waste
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
 	"time"
 
 	"golang.org/x/crypto/chacha20"

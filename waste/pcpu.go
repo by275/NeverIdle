@@ -1,8 +1,8 @@
 package waste
 
 import (
+	"crypto/rand"
 	"log"
-	"math/rand"
 	"runtime"
 	"time"
 

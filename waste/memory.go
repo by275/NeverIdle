@@ -1,6 +1,6 @@
 package waste
 
-import "math/rand"
+import "crypto/rand"
 
 var Buffers []*GiBObject
 
