@@ -7,8 +7,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/layou233/neveridle/controller"
-	"github.com/layou233/neveridle/waste"
+	"github.com/by275/neveridle/controller"
+	"github.com/by275/neveridle/waste"
 )
 
 const Version = "0.2.3"
