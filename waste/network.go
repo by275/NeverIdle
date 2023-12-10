@@ -12,17 +12,18 @@ import (
 
 func Network(interval time.Duration, connectionCount int) {
 	cache := false
-	speedtest.GlobalDataManager.SetNThread(connectionCount)
+	speedtestClient := speedtest.New()
+	speedtestClient.SetNThread(connectionCount)
 	var targets speedtest.Servers
 	for {
 		if !cache {
-			_, err := speedtest.FetchUserInfo()
+			_, err := speedtestClient.FetchUserInfo()
 			if err != nil {
 				fmt.Println("[NETWORK] Error when fetching user info:", err)
 				time.Sleep(time.Minute)
 				continue
 			}
-			serverList, err := speedtest.FetchServers()
+			serverList, err := speedtestClient.FetchServers()
 			if err != nil {
 				fmt.Println("[NETWORK] Error when fetching servers:", err)
 				time.Sleep(time.Minute)
@@ -60,7 +61,7 @@ func Network(interval time.Duration, connectionCount int) {
 
 		fmt.Println("[NETWORK] SpeedTest Ping:", s.Latency, ", Download:", s.DLSpeed, ", Upload:", s.ULSpeed, "mainServer", s.String())
 
-		speedtest.GlobalDataManager.Reset()
+		speedtestClient.Manager.Reset()
 		runtime.GC()
 		time.Sleep(interval)
 	}
