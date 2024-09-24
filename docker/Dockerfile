@@ -7,7 +7,7 @@ RUN apk add --no-cache git && \
 
 FROM alpine
 LABEL maintainer="by275"
-LABEL org.opencontainers.image.source https://github.com/by275/NeverIdle
+LABEL org.opencontainers.image.source=https://github.com/by275/NeverIdle
 
 RUN apk add --no-cache tini
 COPY --from=golang /go/bin/neveridle /usr/local/bin/NeverIdle
