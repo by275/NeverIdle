@@ -6,8 +6,8 @@ require (
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/showwin/speedtest-go v1.7.9
 	go.einride.tech/pid v0.1.3
-	golang.org/x/crypto v0.27.0
-	golang.org/x/sys v0.25.0
+	golang.org/x/crypto v0.30.0
+	golang.org/x/sys v0.28.0
 )
 
 require (
@@ -16,6 +16,6 @@ require (
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/tklauser/go-sysconf v0.3.14 // indirect
-	github.com/tklauser/numcpus v0.8.0 // indirect
+	github.com/tklauser/numcpus v0.9.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 )
