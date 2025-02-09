@@ -4,10 +4,10 @@ go 1.23
 
 require (
 	github.com/shirou/gopsutil/v3 v3.24.5
-	github.com/showwin/speedtest-go v1.7.9
+	github.com/showwin/speedtest-go v1.7.10
 	go.einride.tech/pid v0.1.3
-	golang.org/x/crypto v0.30.0
-	golang.org/x/sys v0.28.0
+	golang.org/x/crypto v0.33.0
+	golang.org/x/sys v0.30.0
 )
 
 require (
