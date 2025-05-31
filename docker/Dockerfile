@@ -1,4 +1,4 @@
-ARG ALPINE_VER=3.21
+ARG ALPINE_VER=3.22
 
 FROM alpine:${ALPINE_VER} AS alpine
 FROM golang:alpine${ALPINE_VER} AS golang
