@@ -13,15 +13,15 @@ const cpuWorkerCount = 8
 func CPU(interval time.Duration) {
 	workCh := make(chan struct{})
 	doneCh := make(chan struct{}, cpuWorkerCount)
-	for i := 0; i < cpuWorkerCount; i++ {
+	for range cpuWorkerCount {
 		go runCPUWorker(workCh, doneCh)
 	}
 
 	for {
-		for i := 0; i < cpuWorkerCount; i++ {
+		for range cpuWorkerCount {
 			workCh <- struct{}{}
 		}
-		for i := 0; i < cpuWorkerCount; i++ {
+		for range cpuWorkerCount {
 			<-doneCh
 		}
 
@@ -34,7 +34,7 @@ func runCPUWorker(workCh <-chan struct{}, doneCh chan<- struct{}) {
 	buffer, cipher := newCPUBufferAndCipher()
 
 	for range workCh {
-		for i := 0; i < 64; i++ {
+		for range 64 {
 			cipher.XORKeyStream(buffer, buffer)
 		}
 

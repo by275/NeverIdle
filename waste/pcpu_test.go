@@ -14,11 +14,11 @@ func TestMachineControlConcurrentAccess(t *testing.T) {
 	}
 
 	var wg sync.WaitGroup
-	for i := 0; i < 8; i++ {
+	for i := range 8 {
 		wg.Add(1)
 		go func(step float64) {
 			defer wg.Done()
-			for j := 0; j < 1000; j++ {
+			for range 1000 {
 				m.Control(step)
 				busyTime, idleTime := m.currentTimings()
 				if busyTime < 0 {
