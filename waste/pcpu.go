@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"log"
 	"runtime"
+	"sync"
 	"time"
 
 	"github.com/by275/neveridle/controller"
@@ -28,6 +29,7 @@ type machine struct {
 	idleTime        time.Duration
 
 	revolution float64
+	mu         sync.RWMutex
 }
 
 func newMachine(maxStep float64) *machine {
@@ -43,22 +45,24 @@ func newMachine(maxStep float64) *machine {
 func (m *machine) Run() {
 	var buffer []byte
 	if len(Buffers) > 0 {
-		buffer = Buffers[0].B[:4*MiB]
+		buffer = make([]byte, 4*MiB)
+		copy(buffer, Buffers[0].B[:4*MiB])
 	} else {
 		buffer = make([]byte, 4*MiB)
 	}
 	_, _ = rand.Read(buffer)
 	cipher, _ := chacha20.NewUnauthenticatedCipher(buffer[:32], buffer[:24])
 	for {
+		busyTime, idleTime := m.currentTimings()
 		startTime := time.Now().UnixNano()
-		for time.Now().UnixNano()-startTime < m.busyTime {
+		for time.Now().UnixNano()-startTime < busyTime {
 			cipher.XORKeyStream(buffer, buffer)
 			newCipher, err := chacha20.NewUnauthenticatedCipher(buffer[:32], buffer[:24])
 			if err == nil {
 				cipher = newCipher
 			}
 		}
-		time.Sleep(m.idleTime)
+		time.Sleep(idleTime)
 	}
 }
 
@@ -73,6 +77,9 @@ func (m *machine) Measure() float64 {
 
 func (m *machine) Control(value float64) {
 	// value range [0, maxControlValue] (unit: Nanosecond)
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
 	m.revolution += value
 	if m.revolution < 0 {
 		m.revolution = 0
@@ -84,4 +91,10 @@ func (m *machine) Control(value float64) {
 	totalTime := m.runtimePeriod.Nanoseconds()
 	m.busyTime = int64(float64(totalTime) * value)
 	m.idleTime = time.Duration(totalTime - m.busyTime)
+}
+
+func (m *machine) currentTimings() (int64, time.Duration) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.busyTime, m.idleTime
 }
