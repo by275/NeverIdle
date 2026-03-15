@@ -9,9 +9,12 @@ import (
 
 	"github.com/by275/neveridle/controller"
 	"github.com/by275/neveridle/waste"
+	"github.com/shirou/gopsutil/v3/mem"
 )
 
 const Version = "0.2.3"
+
+const minMemoryReserveGiB = 1
 
 var (
 	FlagCPUPercent             = flag.Float64("cp", 0, "Percent of CPU waste")
@@ -95,6 +98,15 @@ func validateFlags() error {
 	if *FlagMemory < 0 {
 		return fmt.Errorf("-m must be 0 or greater")
 	}
+	if *FlagMemory > 0 {
+		maxMemoryGiB, err := safeMemoryRequestLimitGiB()
+		if err != nil {
+			return err
+		}
+		if *FlagMemory > maxMemoryGiB {
+			return fmt.Errorf("-m must be %d GiB or less on this machine", maxMemoryGiB)
+		}
+	}
 	if *FlagCPU < 0 {
 		return fmt.Errorf("-c must be 0 or greater")
 	}
@@ -108,4 +120,19 @@ func validateFlags() error {
 		return fmt.Errorf("-cp must be between 0 and 1")
 	}
 	return nil
+}
+
+func safeMemoryRequestLimitGiB() (int, error) {
+	vm, err := mem.VirtualMemory()
+	if err != nil {
+		return 0, fmt.Errorf("failed to inspect system memory: %w", err)
+	}
+
+	reserveBytes := uint64(minMemoryReserveGiB) * waste.GiB
+	if vm.Available <= reserveBytes {
+		return 0, nil
+	}
+
+	maxRequestBytes := vm.Available - reserveBytes
+	return int(maxRequestBytes / waste.GiB), nil
 }
