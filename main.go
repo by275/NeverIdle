@@ -27,72 +27,107 @@ var (
 )
 
 func main() {
-	fmt.Println("NeverIdle", Version, "- Getting worse from here.")
-	fmt.Println("Platform:", runtime.GOOS, ",", runtime.GOARCH, ",", runtime.Version())
-	fmt.Println("GitHub: https://github.com/layou233/NeverIdle")
+	printBanner()
 
-	flag.Parse()
-	if err := validateFlags(); err != nil {
+	if err := parseAndValidateFlags(); err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
 		flag.PrintDefaults()
 		os.Exit(2)
 	}
-	nothingEnabled := true
 
+	nothingEnabled := true
+	applyPriority()
+	nothingEnabled = startMemoryWaste(nothingEnabled)
+	nothingEnabled = startCPUWaste(nothingEnabled)
+	nothingEnabled = startNetworkWaste(nothingEnabled)
+
+	if nothingEnabled {
+		flag.PrintDefaults()
+		return
+	}
+
+	waitForShutdown()
+}
+
+func printBanner() {
+	fmt.Println("NeverIdle", Version, "- Getting worse from here.")
+	fmt.Println("Platform:", runtime.GOOS, ",", runtime.GOARCH, ",", runtime.Version())
+	fmt.Println("GitHub: https://github.com/layou233/NeverIdle")
+}
+
+func parseAndValidateFlags() error {
+	flag.Parse()
+	return validateFlags()
+}
+
+func applyPriority() {
 	if *FlagPriority == 666 {
 		fmt.Println("[PRIORITY] Use the worst priority by default.")
 		controller.SetWorstPriority()
-	} else {
-		err := controller.SetPriority(*FlagPriority)
-		if err != nil {
-			fmt.Println("[PRIORITY] Error when set priority:", err)
-		}
+		return
 	}
 
-	if *FlagMemory != 0 {
-		nothingEnabled = false
-		fmt.Println("====================")
-		fmt.Println("Starting memory wasting of", *FlagMemory, "GiB")
-		go waste.Memory(*FlagMemory)
-		runtime.Gosched()
-		fmt.Println("====================")
+	err := controller.SetPriority(*FlagPriority)
+	if err != nil {
+		fmt.Println("[PRIORITY] Error when set priority:", err)
+	}
+}
+
+func startMemoryWaste(nothingEnabled bool) bool {
+	if *FlagMemory == 0 {
+		return nothingEnabled
 	}
 
+	fmt.Println("====================")
+	fmt.Println("Starting memory wasting of", *FlagMemory, "GiB")
+	go waste.Memory(*FlagMemory)
+	runtime.Gosched()
+	fmt.Println("====================")
+	return false
+}
+
+func startCPUWaste(nothingEnabled bool) bool {
 	if *FlagCPU != 0 {
-		nothingEnabled = false
 		fmt.Println("====================")
 		fmt.Println("Starting CPU wasting with interval", *FlagCPU)
 		go waste.CPU(*FlagCPU)
 		runtime.Gosched()
 		fmt.Println("====================")
-	} else if *FlagCPUPercent != 0 {
-		nothingEnabled = false
-		fmt.Println("====================")
-		fmt.Println("Starting CPU wasting with target ratio", *FlagCPUPercent)
-		waste.CPUPercent(*FlagCPUPercent)
-		runtime.Gosched()
-		fmt.Println("====================")
+		return false
 	}
 
-	if *FlagNetwork != 0 {
-		nothingEnabled = false
-		fmt.Println("====================")
-		fmt.Println("Starting network speed testing with interval", *FlagNetwork)
-		go waste.Network(*FlagNetwork, *FlagNetworkConnectionCount)
-		runtime.Gosched()
-		fmt.Println("====================")
+	if *FlagCPUPercent == 0 {
+		return nothingEnabled
 	}
 
-	if nothingEnabled {
-		flag.PrintDefaults()
-	} else {
-		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-		defer stop()
+	fmt.Println("====================")
+	fmt.Println("Starting CPU wasting with target ratio", *FlagCPUPercent)
+	waste.CPUPercent(*FlagCPUPercent)
+	runtime.Gosched()
+	fmt.Println("====================")
+	return false
+}
 
-		fmt.Println("NeverIdle is running. Press Ctrl+C to stop.")
-		<-ctx.Done()
-		fmt.Println("Shutting down NeverIdle.")
+func startNetworkWaste(nothingEnabled bool) bool {
+	if *FlagNetwork == 0 {
+		return nothingEnabled
 	}
+
+	fmt.Println("====================")
+	fmt.Println("Starting network speed testing with interval", *FlagNetwork)
+	go waste.Network(*FlagNetwork, *FlagNetworkConnectionCount)
+	runtime.Gosched()
+	fmt.Println("====================")
+	return false
+}
+
+func waitForShutdown() {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+
+	fmt.Println("NeverIdle is running. Press Ctrl+C to stop.")
+	<-ctx.Done()
+	fmt.Println("Shutting down NeverIdle.")
 }
 
 func validateFlags() error {
