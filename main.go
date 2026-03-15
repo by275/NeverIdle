@@ -1,11 +1,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
 	"runtime"
-	"time"
 
 	"github.com/by275/neveridle/controller"
 	"github.com/by275/neveridle/waste"
@@ -85,12 +86,12 @@ func main() {
 	if nothingEnabled {
 		flag.PrintDefaults()
 	} else {
-		// fatal error: all goroutines are asleep - deadlock!
-		// select {} // fall asleep
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+		defer stop()
 
-		for {
-			time.Sleep(24 * time.Hour)
-		}
+		fmt.Println("NeverIdle is running. Press Ctrl+C to stop.")
+		<-ctx.Done()
+		fmt.Println("Shutting down NeverIdle.")
 	}
 }
 
