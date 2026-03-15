@@ -7,18 +7,16 @@ import (
 	"time"
 
 	"github.com/by275/neveridle/controller"
-
 	"github.com/shirou/gopsutil/v3/cpu"
 	"go.einride.tech/pid"
 	"golang.org/x/crypto/chacha20"
 )
 
-var c *pid.Controller
-
 func CPUPercent(referencePercent float64) {
 	maxStep := 100000.0
 	rateImpact := maxStep / 1000
-	c = controller.RunPID(newMachine(maxStep), referencePercent, rateImpact, false)
+	machine := newMachine(maxStep)
+	machine.controller = controller.RunPID(machine, referencePercent, rateImpact, false)
 }
 
 type machine struct {
@@ -29,6 +27,7 @@ type machine struct {
 
 	revolution float64
 	mu         sync.RWMutex
+	controller *pid.Controller
 }
 
 func newMachine(maxStep float64) *machine {
@@ -74,7 +73,9 @@ func (m *machine) Control(value float64) {
 	m.revolution += value
 	if m.revolution < 0 {
 		m.revolution = 0
-		c.Reset()
+		if m.controller != nil {
+			m.controller.Reset()
+		}
 	} else if m.revolution > m.maxControlValue {
 		m.revolution = m.maxControlValue
 	}

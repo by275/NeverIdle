@@ -48,11 +48,8 @@ func runCPUWorker(workCh <-chan struct{}, doneCh chan<- struct{}) {
 }
 
 func newCPUBufferAndCipher() ([]byte, *chacha20.Cipher) {
-	var buffer []byte
-	if len(Buffers) > 0 {
-		buffer = make([]byte, 4*MiB)
-		copy(buffer, Buffers[0].B[:4*MiB])
-	} else {
+	buffer := allocatedMemory.firstBufferPrefix(4 * MiB)
+	if len(buffer) == 0 {
 		buffer = make([]byte, 4*MiB)
 	}
 	if _, err := rand.Read(buffer); err != nil {
