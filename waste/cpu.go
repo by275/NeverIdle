@@ -8,38 +8,53 @@ import (
 	"golang.org/x/crypto/chacha20"
 )
 
-func CPU(interval time.Duration) {
-	var buffer []byte
-	if len(Buffers) > 0 {
-		buffer = Buffers[0].B[:4*MiB]
-	} else {
-		buffer = make([]byte, 4*MiB)
-	}
-	rand.Read(buffer)
+const cpuWorkerCount = 8
 
-	// construct XChaCha20 stream cipher
-	cipher, err := chacha20.NewUnauthenticatedCipher(buffer[:32], buffer[:24])
-	if err != nil {
-		panic(cipher)
+func CPU(interval time.Duration) {
+	workCh := make(chan struct{})
+	doneCh := make(chan struct{}, cpuWorkerCount)
+	for i := 0; i < cpuWorkerCount; i++ {
+		go runCPUWorker(workCh, doneCh)
 	}
 
 	for {
-		for i := 0; i < 8; i++ {
-			go func() {
-				for i := 0; i < 64; i++ {
-					cipher.XORKeyStream(buffer, buffer)
-				}
-			}()
+		for i := 0; i < cpuWorkerCount; i++ {
+			workCh <- struct{}{}
+		}
+		for i := 0; i < cpuWorkerCount; i++ {
+			<-doneCh
 		}
 
 		fmt.Println("[CPU] Successfully wasted on", time.Now())
+		time.Sleep(interval)
+	}
+}
 
-		// try to construct a new cipher
+func runCPUWorker(workCh <-chan struct{}, doneCh chan<- struct{}) {
+	var buffer []byte
+	if len(Buffers) > 0 {
+		buffer = make([]byte, 4*MiB)
+		copy(buffer, Buffers[0].B[:4*MiB])
+	} else {
+		buffer = make([]byte, 4*MiB)
+	}
+	_, _ = rand.Read(buffer)
+
+	cipher, err := chacha20.NewUnauthenticatedCipher(buffer[:32], buffer[:24])
+	if err != nil {
+		panic(err)
+	}
+
+	for range workCh {
+		for i := 0; i < 64; i++ {
+			cipher.XORKeyStream(buffer, buffer)
+		}
+
 		newCipher, err := chacha20.NewUnauthenticatedCipher(buffer[:32], buffer[:24])
 		if err == nil {
 			cipher = newCipher
 		}
 
-		time.Sleep(interval)
+		doneCh <- struct{}{}
 	}
 }
