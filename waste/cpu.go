@@ -2,7 +2,6 @@ package waste
 
 import (
 	"crypto/rand"
-	"fmt"
 	"log"
 	"time"
 
@@ -26,7 +25,7 @@ func CPU(interval time.Duration) {
 			<-doneCh
 		}
 
-		fmt.Println("[CPU] Successfully wasted on", time.Now())
+		log.Printf("[CPU] Successfully wasted on %s", time.Now().Format(time.RFC3339))
 		time.Sleep(interval)
 	}
 }

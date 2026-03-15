@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"fmt"
+	"log"
 	"time"
 
 	"go.einride.tech/pid"
@@ -37,7 +37,7 @@ func RunPID(
 				SamplingInterval: samplingInterval,
 			})
 			if debug {
-				fmt.Printf("actualSignal: %.2f, controlSignal: %.2f\n", actualSignal, c.State.ControlSignal)
+				log.Printf("[PID] actualSignal=%.2f controlSignal=%.2f", actualSignal, c.State.ControlSignal)
 			}
 			device.Control(c.State.ControlSignal)
 		}
@@ -47,7 +47,7 @@ func RunPID(
 
 func normalizeReferenceSignal(referenceSignal float64) float64 {
 	if referenceSignal < 0 || referenceSignal > 1 {
-		fmt.Printf("warning: invalid CPU waste ratio %.2f, falling back to 0.15\n", referenceSignal)
+		log.Printf("[PID] invalid CPU waste ratio %.2f, falling back to 0.15", referenceSignal)
 		referenceSignal = 0.15
 	}
 	return referenceSignal * 100

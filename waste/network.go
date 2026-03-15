@@ -2,7 +2,7 @@ package waste
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"math/rand"
 	"runtime"
 	"time"
@@ -27,7 +27,7 @@ func Network(interval time.Duration, connectionCount int) {
 			_, err := speedtestClient.FetchUserInfoContext(fetchCtx)
 			cancelFetch()
 			if err != nil {
-				fmt.Println("[NETWORK] Error when fetching user info:", err)
+				log.Printf("[NETWORK] Error when fetching user info: %v", err)
 				sleepWithTimeout(time.Minute)
 				continue
 			}
@@ -36,14 +36,14 @@ func Network(interval time.Duration, connectionCount int) {
 			serverList, err := speedtest.FetchServerListContext(serverCtx)
 			cancelServers()
 			if err != nil {
-				fmt.Println("[NETWORK] Error when fetching servers:", err)
+				log.Printf("[NETWORK] Error when fetching servers: %v", err)
 				sleepWithTimeout(time.Minute)
 				continue
 			}
 
 			targets = *serverList.Available()
 			if len(targets) == 0 {
-				fmt.Println("[NETWORK] No available server to test. Retry in 5 seconds...")
+				log.Printf("[NETWORK] No available server to test. Retry in 5 seconds...")
 				sleepWithTimeout(5 * time.Second)
 				continue
 			}
@@ -76,7 +76,7 @@ func Network(interval time.Duration, connectionCount int) {
 			s.ULSpeed = -1
 		}
 
-		fmt.Println("[NETWORK] SpeedTest Ping:", s.Latency, ", Download:", s.DLSpeed, ", Upload:", s.ULSpeed, "mainServer", s.String())
+		log.Printf("[NETWORK] SpeedTest Ping=%s Download=%v Upload=%v mainServer=%s", s.Latency, s.DLSpeed, s.ULSpeed, s.String())
 
 		speedtestClient.Manager.Reset()
 		runtime.GC()
