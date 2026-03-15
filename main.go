@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"runtime"
 	"time"
 
@@ -27,6 +28,11 @@ func main() {
 	fmt.Println("GitHub: https://github.com/layou233/NeverIdle")
 
 	flag.Parse()
+	if err := validateFlags(); err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		flag.PrintDefaults()
+		os.Exit(2)
+	}
 	nothingEnabled := true
 
 	if *FlagPriority == 666 {
@@ -83,4 +89,23 @@ func main() {
 			time.Sleep(24 * time.Hour)
 		}
 	}
+}
+
+func validateFlags() error {
+	if *FlagMemory < 0 {
+		return fmt.Errorf("-m must be 0 or greater")
+	}
+	if *FlagCPU < 0 {
+		return fmt.Errorf("-c must be 0 or greater")
+	}
+	if *FlagNetwork < 0 {
+		return fmt.Errorf("-n must be 0 or greater")
+	}
+	if *FlagNetworkConnectionCount <= 0 {
+		return fmt.Errorf("-t must be greater than 0")
+	}
+	if *FlagCPUPercent < 0 || *FlagCPUPercent > 1 {
+		return fmt.Errorf("-cp must be between 0 and 1")
+	}
+	return nil
 }
