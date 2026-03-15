@@ -1,7 +1,6 @@
 package waste
 
 import (
-	"crypto/rand"
 	"log"
 	"runtime"
 	"sync"
@@ -43,15 +42,7 @@ func newMachine(maxStep float64) *machine {
 }
 
 func (m *machine) Run() {
-	var buffer []byte
-	if len(Buffers) > 0 {
-		buffer = make([]byte, 4*MiB)
-		copy(buffer, Buffers[0].B[:4*MiB])
-	} else {
-		buffer = make([]byte, 4*MiB)
-	}
-	_, _ = rand.Read(buffer)
-	cipher, _ := chacha20.NewUnauthenticatedCipher(buffer[:32], buffer[:24])
+	buffer, cipher := newCPUBufferAndCipher()
 	for {
 		busyTime, idleTime := m.currentTimings()
 		startTime := time.Now().UnixNano()

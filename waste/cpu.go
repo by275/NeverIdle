@@ -3,6 +3,7 @@ package waste
 import (
 	"crypto/rand"
 	"fmt"
+	"log"
 	"time"
 
 	"golang.org/x/crypto/chacha20"
@@ -31,19 +32,7 @@ func CPU(interval time.Duration) {
 }
 
 func runCPUWorker(workCh <-chan struct{}, doneCh chan<- struct{}) {
-	var buffer []byte
-	if len(Buffers) > 0 {
-		buffer = make([]byte, 4*MiB)
-		copy(buffer, Buffers[0].B[:4*MiB])
-	} else {
-		buffer = make([]byte, 4*MiB)
-	}
-	_, _ = rand.Read(buffer)
-
-	cipher, err := chacha20.NewUnauthenticatedCipher(buffer[:32], buffer[:24])
-	if err != nil {
-		panic(err)
-	}
+	buffer, cipher := newCPUBufferAndCipher()
 
 	for range workCh {
 		for i := 0; i < 64; i++ {
@@ -57,4 +46,23 @@ func runCPUWorker(workCh <-chan struct{}, doneCh chan<- struct{}) {
 
 		doneCh <- struct{}{}
 	}
+}
+
+func newCPUBufferAndCipher() ([]byte, *chacha20.Cipher) {
+	var buffer []byte
+	if len(Buffers) > 0 {
+		buffer = make([]byte, 4*MiB)
+		copy(buffer, Buffers[0].B[:4*MiB])
+	} else {
+		buffer = make([]byte, 4*MiB)
+	}
+	if _, err := rand.Read(buffer); err != nil {
+		log.Panicf("failed to initialize CPU buffer: %v", err)
+	}
+
+	cipher, err := chacha20.NewUnauthenticatedCipher(buffer[:32], buffer[:24])
+	if err != nil {
+		log.Panicf("failed to initialize CPU cipher: %v", err)
+	}
+	return buffer, cipher
 }
