@@ -36,8 +36,8 @@ In which:
 E.g. waste CPU every 12 hours 23 minutes and 34 seconds, then the argument would be `-c 12h23m34s`.
 Just follow this template.
 
--cp enables coarse-grained CPU percentage waste, and the waste rate will change in real time with the usage level of the machine.  
-If the maximum waste of 20% of the CPU is `-cp 0.2`. The value range of percentage is [0, 1] and be careful not to use it with `-c`.
+-cp enables coarse-grained CPU waste control, and the waste rate will change in real time with the usage level of the machine.  
+The value is a ratio in the range [0, 1]. For example, use `-cp 0.2` to target an extra 20% CPU load. Do not use it together with `-c`.
 
 -m enables memory waste, followed by a number in GiB.  
 After startup, the specified amount of memory will be occupied and will not be released until the process is killed.

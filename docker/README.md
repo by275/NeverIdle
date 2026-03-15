@@ -20,7 +20,7 @@ GitHub: https://github.com/layou233/NeverIdle
   -c duration
         Interval for CPU waste
   -cp float
-        Percent of CPU waste
+        Target CPU waste ratio between 0 and 1
   -m int
         GiB of memory waste
   -n duration

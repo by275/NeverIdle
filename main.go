@@ -17,7 +17,7 @@ const Version = "0.2.3"
 const minMemoryReserveGiB = 1
 
 var (
-	FlagCPUPercent             = flag.Float64("cp", 0, "Percent of CPU waste")
+	FlagCPUPercent             = flag.Float64("cp", 0, "Target CPU waste ratio between 0 and 1")
 	FlagCPU                    = flag.Duration("c", 0, "Interval for CPU waste")
 	FlagMemory                 = flag.Int("m", 0, "GiB of memory waste")
 	FlagNetwork                = flag.Duration("n", 0, "Interval for network speed test")
@@ -67,7 +67,7 @@ func main() {
 	} else if *FlagCPUPercent != 0 {
 		nothingEnabled = false
 		fmt.Println("====================")
-		fmt.Println("Starting CPU wasting with percent", *FlagCPUPercent)
+		fmt.Println("Starting CPU wasting with target ratio", *FlagCPUPercent)
 		waste.CPUPercent(*FlagCPUPercent)
 		runtime.Gosched()
 		fmt.Println("====================")
@@ -117,7 +117,7 @@ func validateFlags() error {
 		return fmt.Errorf("-t must be greater than 0")
 	}
 	if *FlagCPUPercent < 0 || *FlagCPUPercent > 1 {
-		return fmt.Errorf("-cp must be between 0 and 1")
+		return fmt.Errorf("-cp must be a ratio between 0 and 1")
 	}
 	return nil
 }

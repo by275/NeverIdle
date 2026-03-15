@@ -37,8 +37,8 @@ Donde:
 Por ejemplo, para desperdiciar CPU cada 12 horas, 23 minutos y 34 segundos, el argumento sería `-c 12h23m34s`.
 Solo sigue esta plantilla.
 
--cp activa el desperdicio de porcentaje de CPU de granulación gruesa, y la tasa de desperdicio cambiará en tiempo real según el nivel de uso de la máquina.
-Si el desperdicio máximo del 20% de la CPU es `-cp 0.2`. El rango de valores del porcentaje es [0, 1], y ten cuidado de no usarlo junto con `-c`.
+-cp activa el control aproximado del desperdicio de CPU, y la tasa de desperdicio cambiará en tiempo real según el nivel de uso de la máquina.
+El valor es una proporción en el rango [0, 1]. Por ejemplo, usa `-cp 0.2` para apuntar a un 20% extra de carga de CPU. No lo uses junto con `-c`.
 
 -m activa el desperdicio de memoria, seguido de un número en GiB.
 Después de iniciarse, se ocupará la cantidad de memoria especificada y no se liberará hasta que el proceso sea detenido.

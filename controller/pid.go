@@ -20,11 +20,11 @@ func RunPID(
 	rateImpact float64,
 	debug bool,
 ) *pid.Controller {
-	referenceSignal *= 100
-	if referenceSignal < 0 || referenceSignal > 100 {
-		referenceSignal = 15
-		fmt.Printf("warning: error reference signal: %.2f\n", referenceSignal)
+	if referenceSignal < 0 || referenceSignal > 1 {
+		fmt.Printf("warning: invalid CPU waste ratio %.2f, falling back to 0.15\n", referenceSignal)
+		referenceSignal = 0.15
 	}
+	referenceSignal *= 100
 	c := &pid.Controller{
 		Config: pid.ControllerConfig{
 			ProportionalGain: rateImpact,
