@@ -25,7 +25,7 @@ func CPU(interval time.Duration) {
 			<-doneCh
 		}
 
-		log.Logf("CPU", "Successfully wasted on %s", time.Now().Format(time.RFC3339))
+		log.Logf("CPU", "Successfully wasted")
 		time.Sleep(interval)
 	}
 }

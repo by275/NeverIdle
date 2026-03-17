@@ -43,7 +43,7 @@ func Network(interval time.Duration, connectionCount int) {
 
 			targets = *serverList.Available()
 			if len(targets) == 0 {
-				log.Logf("NET", "No available server to test. Retry in 5 seconds...")
+				log.Logf("NET", "No available server to test, retrying in 5s")
 				sleepWithTimeout(5 * time.Second)
 				continue
 			}

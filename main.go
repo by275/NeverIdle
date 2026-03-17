@@ -47,7 +47,7 @@ func main() {
 }
 
 func printBanner() {
-	log.Logf("INFO", "NeverIdle %s - Getting worse from here.", Version)
+	log.Logf("INFO", "NeverIdle %s - Getting worse from here", Version)
 	log.Logf("INFO", "Platform: %s, %s, %s", runtime.GOOS, runtime.GOARCH, runtime.Version())
 	log.Logf("INFO", "GitHub: https://github.com/layou233/NeverIdle")
 }
@@ -103,7 +103,7 @@ func waitForShutdown() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	log.Logf("INFO", "NeverIdle is running. Press Ctrl+C to stop.")
+	log.Logf("INFO", "NeverIdle is running, press Ctrl+C to stop")
 	<-ctx.Done()
 	log.Logf("INFO", "Shutting down NeverIdle.")
 }
