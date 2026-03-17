@@ -30,7 +30,8 @@ var (
 func main() {
 	printBanner()
 
-	if err := parseAndValidateFlags(); err != nil {
+	flag.Parse()
+	if err := validateFlags(); err != nil {
 		log.Logf("ERROR", "%v", err)
 		flag.PrintDefaults()
 		os.Exit(2)
@@ -54,11 +55,6 @@ func printBanner() {
 	log.Logf("INFO", "NeverIdle %s - Getting worse from here.", Version)
 	log.Logf("INFO", "Platform: %s, %s, %s", runtime.GOOS, runtime.GOARCH, runtime.Version())
 	log.Logf("INFO", "GitHub: https://github.com/layou233/NeverIdle")
-}
-
-func parseAndValidateFlags() error {
-	flag.Parse()
-	return validateFlags()
 }
 
 func applyPriority() {
@@ -132,17 +128,8 @@ func waitForShutdown() {
 }
 
 func validateFlags() error {
-	if *FlagMemory < 0 {
-		return fmt.Errorf("-m must be 0 or greater")
-	}
-	if *FlagMemory > 0 {
-		maxMemoryGiB, err := safeMemoryRequestLimitGiB()
-		if err != nil {
-			return err
-		}
-		if *FlagMemory > maxMemoryGiB {
-			return fmt.Errorf("-m must be %d GiB or less on this machine", maxMemoryGiB)
-		}
+	if err := validateMemoryFlag(); err != nil {
+		return err
 	}
 	if *FlagCPU < 0 {
 		return fmt.Errorf("-c must be 0 or greater")
@@ -155,6 +142,24 @@ func validateFlags() error {
 	}
 	if *FlagCPUPercent < 0 || *FlagCPUPercent > 1 {
 		return fmt.Errorf("-cp must be a ratio between 0 and 1")
+	}
+	return nil
+}
+
+func validateMemoryFlag() error {
+	if *FlagMemory < 0 {
+		return fmt.Errorf("-m must be 0 or greater")
+	}
+	if *FlagMemory == 0 {
+		return nil
+	}
+
+	maxMemoryGiB, err := safeMemoryRequestLimitGiB()
+	if err != nil {
+		return err
+	}
+	if *FlagMemory > maxMemoryGiB {
+		return fmt.Errorf("-m must be %d GiB or less on this machine", maxMemoryGiB)
 	}
 	return nil
 }
