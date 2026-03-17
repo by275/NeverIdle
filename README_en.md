@@ -52,5 +52,6 @@ The default is 10. The larger the value, the more resources will be consumed. Fo
 For UNIX-like systems (such as Linux, FreeBSD, and macOS), the value range is [-20,19], and the higher the number, the lower the priority.  
 For Windows, see [the official documentation](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setpriorityclass).  
 It is recommended not to specify because the default is the lowest priority, making way for all other processes.
+On Linux, the default mode lowers both CPU scheduling priority and disk I/O priority. On other UNIX-like systems, it only lowers CPU scheduling priority. On Windows, it changes the process priority class. This mainly affects CPU-heavy work and can indirectly affect network tests, but it does not directly reduce how much memory `-m` keeps reserved.
 
 *All the functions you configured will be executed once immediately when you start the program, so you can take a look at the effect.*

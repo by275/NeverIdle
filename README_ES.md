@@ -53,5 +53,6 @@ El valor predeterminado es 10. Cuanto mayor sea el valor, más recursos se consu
 Para sistemas similares a UNIX (como Linux, FreeBSD y macOS), el rango de valores es [-20, 19], y cuanto mayor sea el número, menor será la prioridad.
 Para Windows, consulta [la documentación oficial](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setpriorityclass).
 Se recomienda no especificar un valor, ya que el valor predeterminado es la prioridad más baja, lo que permitirá que todos los demás procesos tengan prioridad.
+En Linux, el modo predeterminado reduce tanto la prioridad de planificación de CPU como la prioridad de I/O de disco. En otros sistemas tipo UNIX, solo reduce la prioridad de planificación de CPU. En Windows, cambia la clase de prioridad del proceso. Esto afecta principalmente a las cargas intensivas de CPU y puede afectar indirectamente a las pruebas de red, pero no reduce directamente la memoria que `-m` mantiene reservada.
 
 *Todas las funciones que hayas configurado se ejecutarán inmediatamente una vez que inicies el programa, para que puedas ver el efecto.*

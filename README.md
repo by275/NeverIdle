@@ -51,5 +51,6 @@ MJJ 们估计会喜欢这个。感谢脚本作者 @Ansen
 对于 UNIX-like 系统（如 Linux、FreeBSD 和 macOS），数值取值范围为 [-20,19] ，数字越大优先级越低。  
 对于 Windows ，参见 [官方文档](https://learn.microsoft.com/zh-cn/windows/win32/api/processthreadsapi/nf-processthreadsapi-setpriorityclass)。  
 建议不进行指定，默认即为最低优先级，为其它所有进程让路。
+在 Linux 上，默认模式会同时降低 CPU 调度优先级和磁盘 I/O 优先级；在其他 UNIX-like 系统上，只会降低 CPU 调度优先级；在 Windows 上，会调整进程优先级类别。它主要影响 CPU 密集型负载，并可能间接影响网络测速，但不会直接减少 `-m` 持续占用的内存量。
 
 *启动该程序后即立刻执行一次你配置的所有功能，可以观察效果。*
