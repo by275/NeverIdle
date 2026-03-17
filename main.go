@@ -49,7 +49,7 @@ func main() {
 func printBanner() {
 	log.Logf("INFO", "NeverIdle %s - Getting worse from here", Version)
 	log.Logf("INFO", "Platform: %s, %s, %s", runtime.GOOS, runtime.GOARCH, runtime.Version())
-	log.Logf("INFO", "GitHub: https://github.com/layou233/NeverIdle")
+	log.Logf("INFO", "GitHub: https://github.com/by275/NeverIdle")
 }
 
 func applyPriority() {

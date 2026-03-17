@@ -1,4 +1,4 @@
-# Dockerized [NeverIdle](https://github.com/layou233/NeverIdle)
+# Dockerized [NeverIdle](https://github.com/by275/NeverIdle)
 
 ## [OCI Idle Compute Instances](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm)
 
@@ -15,7 +15,7 @@ Idle Always Free compute instances may be reclaimed by Oracle. Oracle will deem 
 ```asciidoc
 NeverIdle 0.2.3 - Getting worse from here.
 Platform: linux , amd64 , go1.21.1
-GitHub: https://github.com/layou233/NeverIdle
+GitHub: https://github.com/by275/NeverIdle
 [PRIORITY] Use the worst priority by default.
   -c duration
         Interval for CPU waste
