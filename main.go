@@ -41,6 +41,7 @@ func main() {
 	applyPriority()
 	nothingEnabled = startMemoryWaste(nothingEnabled)
 	nothingEnabled = startCPUWaste(nothingEnabled)
+	nothingEnabled = startCPUPercentWaste(nothingEnabled)
 	nothingEnabled = startNetworkWaste(nothingEnabled)
 
 	if nothingEnabled {
@@ -84,15 +85,19 @@ func startMemoryWaste(nothingEnabled bool) bool {
 }
 
 func startCPUWaste(nothingEnabled bool) bool {
-	if *FlagCPU != 0 {
-		log.Logf("CPU", "====================")
-		log.Logf("CPU", "Starting CPU wasting with interval %s", *FlagCPU)
-		go waste.CPU(*FlagCPU)
-		runtime.Gosched()
-		log.Logf("CPU", "====================")
-		return false
+	if *FlagCPU == 0 {
+		return nothingEnabled
 	}
 
+	log.Logf("CPU", "====================")
+	log.Logf("CPU", "Starting CPU wasting with interval %s", *FlagCPU)
+	go waste.CPU(*FlagCPU)
+	runtime.Gosched()
+	log.Logf("CPU", "====================")
+	return false
+}
+
+func startCPUPercentWaste(nothingEnabled bool) bool {
 	if *FlagCPUPercent == 0 {
 		return nothingEnabled
 	}
@@ -133,6 +138,9 @@ func validateFlags() error {
 	}
 	if *FlagCPU < 0 {
 		return fmt.Errorf("-c must be 0 or greater")
+	}
+	if *FlagCPU != 0 && *FlagCPUPercent != 0 {
+		return fmt.Errorf("-c and -cp cannot be used together")
 	}
 	if *FlagNetwork < 0 {
 		return fmt.Errorf("-n must be 0 or greater")

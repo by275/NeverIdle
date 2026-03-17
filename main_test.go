@@ -61,6 +61,14 @@ func TestValidateFlagsRejectsInvalidValues(t *testing.T) {
 			},
 			wantError: "-cp must be a ratio between 0 and 1",
 		},
+		{
+			name: "cpu modes are mutually exclusive",
+			setup: func() {
+				*FlagCPU = time.Second
+				*FlagCPUPercent = 0.2
+			},
+			wantError: "-c and -cp cannot be used together",
+		},
 	}
 
 	for _, tt := range tests {
@@ -95,7 +103,6 @@ func TestValidateFlagsAcceptsValidValues(t *testing.T) {
 	})
 
 	resetValidationFlags()
-	*FlagCPUPercent = 0.2
 	*FlagCPU = time.Second
 	*FlagNetwork = time.Second
 	*FlagNetworkConnectionCount = 4
