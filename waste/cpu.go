@@ -2,9 +2,9 @@ package waste
 
 import (
 	"crypto/rand"
-	"log"
 	"time"
 
+	"github.com/by275/neveridle/internal/log"
 	"golang.org/x/crypto/chacha20"
 )
 
@@ -25,7 +25,7 @@ func CPU(interval time.Duration) {
 			<-doneCh
 		}
 
-		log.Printf("[CPU] Successfully wasted on %s", time.Now().Format(time.RFC3339))
+		log.Logf("CPU", "Successfully wasted on %s", time.Now().Format(time.RFC3339))
 		time.Sleep(interval)
 	}
 }
@@ -53,12 +53,12 @@ func newCPUBufferAndCipher() ([]byte, *chacha20.Cipher) {
 		buffer = make([]byte, 4*MiB)
 	}
 	if _, err := rand.Read(buffer); err != nil {
-		log.Panicf("failed to initialize CPU buffer: %v", err)
+		log.Panicf("CPU", "failed to initialize CPU buffer: %v", err)
 	}
 
 	cipher, err := chacha20.NewUnauthenticatedCipher(buffer[:32], buffer[:24])
 	if err != nil {
-		log.Panicf("failed to initialize CPU cipher: %v", err)
+		log.Panicf("CPU", "failed to initialize CPU cipher: %v", err)
 	}
 	return buffer, cipher
 }

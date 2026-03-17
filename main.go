@@ -4,12 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"runtime"
 
 	"github.com/by275/neveridle/controller"
+	"github.com/by275/neveridle/internal/log"
 	"github.com/by275/neveridle/waste"
 	"github.com/shirou/gopsutil/v3/mem"
 )
@@ -31,7 +31,7 @@ func main() {
 	printBanner()
 
 	if err := parseAndValidateFlags(); err != nil {
-		log.Printf("[ERROR] %v", err)
+		log.Logf("ERROR", "%v", err)
 		flag.PrintDefaults()
 		os.Exit(2)
 	}
@@ -51,9 +51,9 @@ func main() {
 }
 
 func printBanner() {
-	log.Printf("NeverIdle %s - Getting worse from here.", Version)
-	log.Printf("Platform: %s, %s, %s", runtime.GOOS, runtime.GOARCH, runtime.Version())
-	log.Printf("GitHub: https://github.com/layou233/NeverIdle")
+	log.Logf("INFO", "NeverIdle %s - Getting worse from here.", Version)
+	log.Logf("INFO", "Platform: %s, %s, %s", runtime.GOOS, runtime.GOARCH, runtime.Version())
+	log.Logf("INFO", "GitHub: https://github.com/layou233/NeverIdle")
 }
 
 func parseAndValidateFlags() error {
@@ -63,14 +63,14 @@ func parseAndValidateFlags() error {
 
 func applyPriority() {
 	if *FlagPriority == 666 {
-		log.Printf("[PRIORITY] Use the worst priority by default.")
+		log.Logf("PRIOR", "Use the worst priority by default.")
 		controller.SetWorstPriority()
 		return
 	}
 
 	err := controller.SetPriority(*FlagPriority)
 	if err != nil {
-		log.Printf("[PRIORITY] Error when set priority: %v", err)
+		log.Logf("PRIOR", "Error when set priority: %v", err)
 	}
 }
 
@@ -79,21 +79,21 @@ func startMemoryWaste(nothingEnabled bool) bool {
 		return nothingEnabled
 	}
 
-	log.Printf("====================")
-	log.Printf("Starting memory wasting of %d GiB", *FlagMemory)
+	log.Logf("MEM", "====================")
+	log.Logf("MEM", "Starting memory wasting of %d GiB", *FlagMemory)
 	go waste.Memory(*FlagMemory)
 	runtime.Gosched()
-	log.Printf("====================")
+	log.Logf("MEM", "====================")
 	return false
 }
 
 func startCPUWaste(nothingEnabled bool) bool {
 	if *FlagCPU != 0 {
-		log.Printf("====================")
-		log.Printf("Starting CPU wasting with interval %s", *FlagCPU)
+		log.Logf("CPU", "====================")
+		log.Logf("CPU", "Starting CPU wasting with interval %s", *FlagCPU)
 		go waste.CPU(*FlagCPU)
 		runtime.Gosched()
-		log.Printf("====================")
+		log.Logf("CPU", "====================")
 		return false
 	}
 
@@ -101,11 +101,11 @@ func startCPUWaste(nothingEnabled bool) bool {
 		return nothingEnabled
 	}
 
-	log.Printf("====================")
-	log.Printf("Starting CPU wasting with target ratio %.2f", *FlagCPUPercent)
+	log.Logf("CPU", "====================")
+	log.Logf("CPU", "Starting CPU wasting with target ratio %.2f", *FlagCPUPercent)
 	waste.CPUPercent(*FlagCPUPercent)
 	runtime.Gosched()
-	log.Printf("====================")
+	log.Logf("CPU", "====================")
 	return false
 }
 
@@ -114,11 +114,11 @@ func startNetworkWaste(nothingEnabled bool) bool {
 		return nothingEnabled
 	}
 
-	log.Printf("====================")
-	log.Printf("Starting network speed testing with interval %s", *FlagNetwork)
+	log.Logf("NET", "====================")
+	log.Logf("NET", "Starting network speed testing with interval %s", *FlagNetwork)
 	go waste.Network(*FlagNetwork, *FlagNetworkConnectionCount)
 	runtime.Gosched()
-	log.Printf("====================")
+	log.Logf("NET", "====================")
 	return false
 }
 
@@ -126,9 +126,9 @@ func waitForShutdown() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	log.Printf("NeverIdle is running. Press Ctrl+C to stop.")
+	log.Logf("INFO", "NeverIdle is running. Press Ctrl+C to stop.")
 	<-ctx.Done()
-	log.Printf("Shutting down NeverIdle.")
+	log.Logf("INFO", "Shutting down NeverIdle.")
 }
 
 func validateFlags() error {

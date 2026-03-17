@@ -1,12 +1,12 @@
 package waste
 
 import (
-	"log"
 	"runtime"
 	"sync"
 	"time"
 
 	"github.com/by275/neveridle/controller"
+	"github.com/by275/neveridle/internal/log"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"go.einride.tech/pid"
 	"golang.org/x/crypto/chacha20"
@@ -59,7 +59,7 @@ func (m *machine) Run() {
 func (m *machine) Measure() float64 {
 	percent, err := cpu.Percent(time.Second, false)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("PID", "failed to measure CPU usage: %v", err)
 		return -1
 	}
 	return percent[0]

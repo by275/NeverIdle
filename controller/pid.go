@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"log"
 	"time"
 
+	"github.com/by275/neveridle/internal/log"
 	"go.einride.tech/pid"
 )
 
@@ -37,7 +37,7 @@ func RunPID(
 				SamplingInterval: samplingInterval,
 			})
 			if debug {
-				log.Printf("[PID] actualSignal=%.2f controlSignal=%.2f", actualSignal, c.State.ControlSignal)
+				log.Logf("PID", "actualSignal=%.2f controlSignal=%.2f", actualSignal, c.State.ControlSignal)
 			}
 			device.Control(c.State.ControlSignal)
 		}
@@ -47,7 +47,7 @@ func RunPID(
 
 func normalizeReferenceSignal(referenceSignal float64) float64 {
 	if referenceSignal < 0 || referenceSignal > 1 {
-		log.Printf("[PID] invalid CPU waste ratio %.2f, falling back to 0.15", referenceSignal)
+		log.Logf("PID", "invalid CPU waste ratio %.2f, falling back to 0.15", referenceSignal)
 		referenceSignal = 0.15
 	}
 	return referenceSignal * 100

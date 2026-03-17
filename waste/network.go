@@ -2,11 +2,11 @@ package waste
 
 import (
 	"context"
-	"log"
 	"math/rand"
 	"runtime"
 	"time"
 
+	"github.com/by275/neveridle/internal/log"
 	"github.com/showwin/speedtest-go/speedtest"
 )
 
@@ -27,7 +27,7 @@ func Network(interval time.Duration, connectionCount int) {
 			_, err := speedtestClient.FetchUserInfoContext(fetchCtx)
 			cancelFetch()
 			if err != nil {
-				log.Printf("[NETWORK] Error when fetching user info: %v", err)
+				log.Logf("NET", "Error when fetching user info: %v", err)
 				sleepWithTimeout(time.Minute)
 				continue
 			}
@@ -36,14 +36,14 @@ func Network(interval time.Duration, connectionCount int) {
 			serverList, err := speedtest.FetchServerListContext(serverCtx)
 			cancelServers()
 			if err != nil {
-				log.Printf("[NETWORK] Error when fetching servers: %v", err)
+				log.Logf("NET", "Error when fetching servers: %v", err)
 				sleepWithTimeout(time.Minute)
 				continue
 			}
 
 			targets = *serverList.Available()
 			if len(targets) == 0 {
-				log.Printf("[NETWORK] No available server to test. Retry in 5 seconds...")
+				log.Logf("NET", "No available server to test. Retry in 5 seconds...")
 				sleepWithTimeout(5 * time.Second)
 				continue
 			}
@@ -76,7 +76,7 @@ func Network(interval time.Duration, connectionCount int) {
 			s.ULSpeed = -1
 		}
 
-		log.Printf("[NETWORK] SpeedTest Ping=%s Download=%v Upload=%v mainServer=%s", s.Latency, s.DLSpeed, s.ULSpeed, s.String())
+		log.Logf("NET", "SpeedTest Ping=%s Download=%v Upload=%v mainServer=%s", s.Latency, s.DLSpeed, s.ULSpeed, s.String())
 
 		speedtestClient.Manager.Reset()
 		runtime.GC()
