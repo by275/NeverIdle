@@ -37,14 +37,8 @@ func main() {
 		os.Exit(2)
 	}
 
-	nothingEnabled := true
 	applyPriority()
-	nothingEnabled = startMemoryWaste(nothingEnabled)
-	nothingEnabled = startCPUWaste(nothingEnabled)
-	nothingEnabled = startCPUPercentWaste(nothingEnabled)
-	nothingEnabled = startNetworkWaste(nothingEnabled)
-
-	if nothingEnabled {
+	if !startWaste() {
 		flag.PrintDefaults()
 		return
 	}
@@ -71,56 +65,38 @@ func applyPriority() {
 	}
 }
 
-func startMemoryWaste(nothingEnabled bool) bool {
-	if *FlagMemory == 0 {
-		return nothingEnabled
+func startWaste() bool {
+	enabled := false
+
+	if *FlagMemory != 0 {
+		log.Logf("MEM", "Reserving %d GiB in the background until shutdown", *FlagMemory)
+		go waste.Memory(*FlagMemory)
+		runtime.Gosched()
+		enabled = true
 	}
 
-	log.Logf("MEM", "====================")
-	log.Logf("MEM", "Starting memory wasting of %d GiB", *FlagMemory)
-	go waste.Memory(*FlagMemory)
-	runtime.Gosched()
-	log.Logf("MEM", "====================")
-	return false
-}
-
-func startCPUWaste(nothingEnabled bool) bool {
-	if *FlagCPU == 0 {
-		return nothingEnabled
+	if *FlagCPUPercent != 0 {
+		log.Logf("CPU", "Maintaining background CPU occupancy with target ratio %.2f", *FlagCPUPercent)
+		waste.CPUPercent(*FlagCPUPercent)
+		runtime.Gosched()
+		enabled = true
 	}
 
-	log.Logf("CPU", "====================")
-	log.Logf("CPU", "Starting CPU wasting with interval %s", *FlagCPU)
-	go waste.CPU(*FlagCPU)
-	runtime.Gosched()
-	log.Logf("CPU", "====================")
-	return false
-}
-
-func startCPUPercentWaste(nothingEnabled bool) bool {
-	if *FlagCPUPercent == 0 {
-		return nothingEnabled
+	if *FlagCPU != 0 {
+		log.Logf("CPU", "Starting CPU wasting with interval %s", *FlagCPU)
+		go waste.CPU(*FlagCPU)
+		runtime.Gosched()
+		enabled = true
 	}
 
-	log.Logf("CPU", "====================")
-	log.Logf("CPU", "Starting CPU wasting with target ratio %.2f", *FlagCPUPercent)
-	waste.CPUPercent(*FlagCPUPercent)
-	runtime.Gosched()
-	log.Logf("CPU", "====================")
-	return false
-}
-
-func startNetworkWaste(nothingEnabled bool) bool {
-	if *FlagNetwork == 0 {
-		return nothingEnabled
+	if *FlagNetwork != 0 {
+		log.Logf("NET", "Starting network speed testing with interval %s", *FlagNetwork)
+		go waste.Network(*FlagNetwork, *FlagNetworkConnectionCount)
+		runtime.Gosched()
+		enabled = true
 	}
 
-	log.Logf("NET", "====================")
-	log.Logf("NET", "Starting network speed testing with interval %s", *FlagNetwork)
-	go waste.Network(*FlagNetwork, *FlagNetworkConnectionCount)
-	runtime.Gosched()
-	log.Logf("NET", "====================")
-	return false
+	return enabled
 }
 
 func waitForShutdown() {
