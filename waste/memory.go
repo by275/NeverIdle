@@ -3,6 +3,8 @@ package waste
 import (
 	"crypto/rand"
 	"sync"
+
+	"github.com/by275/neveridle/internal/log"
 )
 
 const (
@@ -26,7 +28,9 @@ func Memory(gib int) {
 	buffers := make([]*GiBObject, 0, gib)
 	for gib > 0 {
 		o := new(GiBObject)
-		rand.Read(o.B[:])
+		if _, err := rand.Read(o.B[:]); err != nil {
+			log.Panicf("MEM", "failed to initialize reserved memory: %v", err)
+		}
 		buffers = append(buffers, o)
 		gib -= 1
 	}
