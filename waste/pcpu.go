@@ -1,24 +1,22 @@
 package waste
 
 import (
-	"crypto/rand"
-	"log"
 	"runtime"
+	"sync"
 	"time"
 
 	"github.com/by275/neveridle/controller"
-
+	"github.com/by275/neveridle/internal/log"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"go.einride.tech/pid"
 	"golang.org/x/crypto/chacha20"
 )
 
-var c *pid.Controller
-
 func CPUPercent(referencePercent float64) {
 	maxStep := 100000.0
 	rateImpact := maxStep / 1000
-	c = controller.RunPID(newMachine(maxStep), referencePercent, rateImpact, false)
+	machine := newMachine(maxStep)
+	machine.controller = controller.RunPID(machine, referencePercent, rateImpact, false)
 }
 
 type machine struct {
@@ -27,7 +25,10 @@ type machine struct {
 	busyTime        int64
 	idleTime        time.Duration
 
-	revolution float64
+	revolution   float64
+	lastMeasured float64
+	mu           sync.RWMutex
+	controller   *pid.Controller
 }
 
 func newMachine(maxStep float64) *machine {
@@ -41,42 +42,43 @@ func newMachine(maxStep float64) *machine {
 }
 
 func (m *machine) Run() {
-	var buffer []byte
-	if len(Buffers) > 0 {
-		buffer = Buffers[0].B[:4*MiB]
-	} else {
-		buffer = make([]byte, 4*MiB)
-	}
-	_, _ = rand.Read(buffer)
-	cipher, _ := chacha20.NewUnauthenticatedCipher(buffer[:32], buffer[:24])
+	buffer, cipher := newCPUBufferAndCipher()
 	for {
+		busyTime, idleTime := m.currentTimings()
 		startTime := time.Now().UnixNano()
-		for time.Now().UnixNano()-startTime < m.busyTime {
+		for time.Now().UnixNano()-startTime < busyTime {
 			cipher.XORKeyStream(buffer, buffer)
 			newCipher, err := chacha20.NewUnauthenticatedCipher(buffer[:32], buffer[:24])
 			if err == nil {
 				cipher = newCipher
 			}
 		}
-		time.Sleep(m.idleTime)
+		time.Sleep(idleTime)
 	}
 }
 
 func (m *machine) Measure() float64 {
 	percent, err := cpu.Percent(time.Second, false)
 	if err != nil {
-		log.Fatalln(err)
-		return -1
+		log.Logf("PID", "failed to measure CPU usage, reusing last value: %v", err)
+		return m.lastMeasuredValue()
 	}
+
+	m.setLastMeasuredValue(percent[0])
 	return percent[0]
 }
 
 func (m *machine) Control(value float64) {
 	// value range [0, maxControlValue] (unit: Nanosecond)
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
 	m.revolution += value
 	if m.revolution < 0 {
 		m.revolution = 0
-		c.Reset()
+		if m.controller != nil {
+			m.controller.Reset()
+		}
 	} else if m.revolution > m.maxControlValue {
 		m.revolution = m.maxControlValue
 	}
@@ -84,4 +86,22 @@ func (m *machine) Control(value float64) {
 	totalTime := m.runtimePeriod.Nanoseconds()
 	m.busyTime = int64(float64(totalTime) * value)
 	m.idleTime = time.Duration(totalTime - m.busyTime)
+}
+
+func (m *machine) currentTimings() (int64, time.Duration) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.busyTime, m.idleTime
+}
+
+func (m *machine) lastMeasuredValue() float64 {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.lastMeasured
+}
+
+func (m *machine) setLastMeasuredValue(value float64) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.lastMeasured = value
 }

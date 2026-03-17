@@ -36,8 +36,8 @@ In which:
 E.g. waste CPU every 12 hours 23 minutes and 34 seconds, then the argument would be `-c 12h23m34s`.
 Just follow this template.
 
--cp enables coarse-grained CPU percentage waste, and the waste rate will change in real time with the usage level of the machine.  
-If the maximum waste of 20% of the CPU is `-cp 0.2`. The value range of percentage is [0, 1] and be careful not to use it with `-c`.
+-cp enables coarse-grained CPU waste control, and the waste rate will change in real time with the usage level of the machine.  
+The value is a ratio in the range [0, 1]. For example, use `-cp 0.2` to target an extra 20% CPU load. Do not use it together with `-c`.
 
 -m enables memory waste, followed by a number in GiB.  
 After startup, the specified amount of memory will be occupied and will not be released until the process is killed.
@@ -52,5 +52,6 @@ The default is 10. The larger the value, the more resources will be consumed. Fo
 For UNIX-like systems (such as Linux, FreeBSD, and macOS), the value range is [-20,19], and the higher the number, the lower the priority.  
 For Windows, see [the official documentation](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setpriorityclass).  
 It is recommended not to specify because the default is the lowest priority, making way for all other processes.
+On Linux, the default mode lowers both CPU scheduling priority and disk I/O priority. On other UNIX-like systems, it only lowers CPU scheduling priority. On Windows, it changes the process priority class. This mainly affects CPU-heavy work and can indirectly affect network tests, but it does not directly reduce how much memory `-m` keeps reserved.
 
 *All the functions you configured will be executed once immediately when you start the program, so you can take a look at the effect.*

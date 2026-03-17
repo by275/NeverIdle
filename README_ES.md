@@ -37,8 +37,8 @@ Donde:
 Por ejemplo, para desperdiciar CPU cada 12 horas, 23 minutos y 34 segundos, el argumento sería `-c 12h23m34s`.
 Solo sigue esta plantilla.
 
--cp activa el desperdicio de porcentaje de CPU de granulación gruesa, y la tasa de desperdicio cambiará en tiempo real según el nivel de uso de la máquina.
-Si el desperdicio máximo del 20% de la CPU es `-cp 0.2`. El rango de valores del porcentaje es [0, 1], y ten cuidado de no usarlo junto con `-c`.
+-cp activa el control aproximado del desperdicio de CPU, y la tasa de desperdicio cambiará en tiempo real según el nivel de uso de la máquina.
+El valor es una proporción en el rango [0, 1]. Por ejemplo, usa `-cp 0.2` para apuntar a un 20% extra de carga de CPU. No lo uses junto con `-c`.
 
 -m activa el desperdicio de memoria, seguido de un número en GiB.
 Después de iniciarse, se ocupará la cantidad de memoria especificada y no se liberará hasta que el proceso sea detenido.
@@ -53,5 +53,6 @@ El valor predeterminado es 10. Cuanto mayor sea el valor, más recursos se consu
 Para sistemas similares a UNIX (como Linux, FreeBSD y macOS), el rango de valores es [-20, 19], y cuanto mayor sea el número, menor será la prioridad.
 Para Windows, consulta [la documentación oficial](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setpriorityclass).
 Se recomienda no especificar un valor, ya que el valor predeterminado es la prioridad más baja, lo que permitirá que todos los demás procesos tengan prioridad.
+En Linux, el modo predeterminado reduce tanto la prioridad de planificación de CPU como la prioridad de I/O de disco. En otros sistemas tipo UNIX, solo reduce la prioridad de planificación de CPU. En Windows, cambia la clase de prioridad del proceso. Esto afecta principalmente a las cargas intensivas de CPU y puede afectar indirectamente a las pruebas de red, pero no reduce directamente la memoria que `-m` mantiene reservada.
 
 *Todas las funciones que hayas configurado se ejecutarán inmediatamente una vez que inicies el programa, para que puedas ver el efecto.*

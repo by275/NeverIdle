@@ -1,4 +1,4 @@
-# Dockerized [NeverIdle](https://github.com/layou233/NeverIdle)
+# Dockerized [NeverIdle](https://github.com/by275/NeverIdle)
 
 ## [OCI Idle Compute Instances](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm)
 
@@ -13,14 +13,14 @@ Idle Always Free compute instances may be reclaimed by Oracle. Oracle will deem 
 ## Usage
 
 ```asciidoc
-NeverIdle 0.2.3 - Getting worse from here.
-Platform: linux , amd64 , go1.21.1
-GitHub: https://github.com/layou233/NeverIdle
-[PRIORITY] Use the worst priority by default.
+2026/03/17 12:00:00 INFO  : NeverIdle 0.2.3 - Getting worse from here
+2026/03/17 12:00:00 INFO  : Platform: linux, amd64, go1.25.0
+2026/03/17 12:00:00 INFO  : GitHub: https://github.com/by275/NeverIdle
+2026/03/17 12:00:00 PRIOR : Use the worst priority by default.
   -c duration
         Interval for CPU waste
   -cp float
-        Percent of CPU waste
+        Target CPU waste ratio between 0 and 1
   -m int
         GiB of memory waste
   -n duration
@@ -29,6 +29,10 @@ GitHub: https://github.com/layou233/NeverIdle
         Set process priority value (default 666)
   -t int
         Set concurrent connections for network speed test (default 10)
+2026/03/17 12:00:00 MEM   : Reserving 2 GiB in the background until shutdown
+2026/03/17 12:00:00 CPU   : Maintaining background CPU occupancy with target ratio 0.15
+2026/03/17 12:00:00 NET   : Starting network speed testing with interval 4h0m0s
+2026/03/17 12:00:00 INFO  : NeverIdle is running, press Ctrl+C to stop
 ```
 
 ```yaml

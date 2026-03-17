@@ -2,44 +2,63 @@ package waste
 
 import (
 	"crypto/rand"
-	"fmt"
 	"time"
 
+	"github.com/by275/neveridle/internal/log"
 	"golang.org/x/crypto/chacha20"
 )
 
-func CPU(interval time.Duration) {
-	var buffer []byte
-	if len(Buffers) > 0 {
-		buffer = Buffers[0].B[:4*MiB]
-	} else {
-		buffer = make([]byte, 4*MiB)
-	}
-	rand.Read(buffer)
+const cpuWorkerCount = 8
 
-	// construct XChaCha20 stream cipher
-	cipher, err := chacha20.NewUnauthenticatedCipher(buffer[:32], buffer[:24])
-	if err != nil {
-		panic(cipher)
+func CPU(interval time.Duration) {
+	workCh := make(chan struct{})
+	doneCh := make(chan struct{}, cpuWorkerCount)
+	for range cpuWorkerCount {
+		go runCPUWorker(workCh, doneCh)
 	}
 
 	for {
-		for i := 0; i < 8; i++ {
-			go func() {
-				for i := 0; i < 64; i++ {
-					cipher.XORKeyStream(buffer, buffer)
-				}
-			}()
+		for range cpuWorkerCount {
+			workCh <- struct{}{}
+		}
+		for range cpuWorkerCount {
+			<-doneCh
 		}
 
-		fmt.Println("[CPU] Successfully wasted on", time.Now())
+		log.Logf("CPU", "Successfully wasted")
+		time.Sleep(interval)
+	}
+}
 
-		// try to construct a new cipher
+func runCPUWorker(workCh <-chan struct{}, doneCh chan<- struct{}) {
+	buffer, cipher := newCPUBufferAndCipher()
+
+	for range workCh {
+		for range 64 {
+			cipher.XORKeyStream(buffer, buffer)
+		}
+
 		newCipher, err := chacha20.NewUnauthenticatedCipher(buffer[:32], buffer[:24])
 		if err == nil {
 			cipher = newCipher
 		}
 
-		time.Sleep(interval)
+		doneCh <- struct{}{}
 	}
+}
+
+func newCPUBufferAndCipher() ([]byte, *chacha20.Cipher) {
+	buffer := allocatedMemory.firstBufferPrefix(4 * MiB)
+	if len(buffer) == 0 {
+		buffer = make([]byte, 4*MiB)
+	}
+	if _, err := rand.Read(buffer); err != nil {
+		log.Panicf("CPU", "failed to initialize CPU buffer: %v", err)
+	}
+
+	cipher, err := chacha20.NewUnauthenticatedCipher(buffer[:32], buffer[:24])
+	if err != nil {
+		log.Panicf("CPU", "failed to initialize CPU cipher: %v", err)
+	}
+	return buffer, cipher
 }

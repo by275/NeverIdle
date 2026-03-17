@@ -1,8 +1,11 @@
 package waste
 
-import "crypto/rand"
+import (
+	"crypto/rand"
+	"sync"
 
-var Buffers []*GiBObject
+	"github.com/by275/neveridle/internal/log"
+)
 
 const (
 	KiB = 1024
@@ -14,12 +17,40 @@ type GiBObject struct {
 	B [GiB]byte
 }
 
+type memoryStore struct {
+	mu      sync.RWMutex
+	buffers []*GiBObject
+}
+
+var allocatedMemory memoryStore
+
 func Memory(gib int) {
-	Buffers = make([]*GiBObject, 0, gib)
+	buffers := make([]*GiBObject, 0, gib)
 	for gib > 0 {
 		o := new(GiBObject)
-		rand.Read(o.B[:])
-		Buffers = append(Buffers, o)
+		if _, err := rand.Read(o.B[:]); err != nil {
+			log.Panicf("MEM", "failed to initialize reserved memory: %v", err)
+		}
+		buffers = append(buffers, o)
 		gib -= 1
 	}
+	allocatedMemory.set(buffers)
+}
+
+func (m *memoryStore) set(buffers []*GiBObject) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.buffers = buffers
+}
+
+func (m *memoryStore) firstBufferPrefix(size int) []byte {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	if len(m.buffers) == 0 {
+		return nil
+	}
+
+	prefix := make([]byte, size)
+	copy(prefix, m.buffers[0].B[:size])
+	return prefix
 }
