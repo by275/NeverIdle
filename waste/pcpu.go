@@ -25,9 +25,10 @@ type machine struct {
 	busyTime        int64
 	idleTime        time.Duration
 
-	revolution float64
-	mu         sync.RWMutex
-	controller *pid.Controller
+	revolution   float64
+	lastMeasured float64
+	mu           sync.RWMutex
+	controller   *pid.Controller
 }
 
 func newMachine(maxStep float64) *machine {
@@ -59,9 +60,11 @@ func (m *machine) Run() {
 func (m *machine) Measure() float64 {
 	percent, err := cpu.Percent(time.Second, false)
 	if err != nil {
-		log.Fatalf("PID", "failed to measure CPU usage: %v", err)
-		return -1
+		log.Logf("PID", "failed to measure CPU usage, reusing last value: %v", err)
+		return m.lastMeasuredValue()
 	}
+
+	m.setLastMeasuredValue(percent[0])
 	return percent[0]
 }
 
@@ -89,4 +92,16 @@ func (m *machine) currentTimings() (int64, time.Duration) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	return m.busyTime, m.idleTime
+}
+
+func (m *machine) lastMeasuredValue() float64 {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.lastMeasured
+}
+
+func (m *machine) setLastMeasuredValue(value float64) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.lastMeasured = value
 }
