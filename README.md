@@ -1,56 +1,97 @@
-# NeverIdle
+# noidle
 
-[**Español**](README_ES.md) | [**English**](README_en.md) | **简体中文**
-
-*我喜欢你，但别删我机，好么？*
-
-本程序随手写的，下面介绍也是随心写的，不喜勿碰。
-
-## 一键脚本 One click to go
-
-```shell
-bash <(curl -s -L https://gist.githubusercontent.com/Ansen/e45320205faf5786d3282ac880f20bab/raw/onekey-NeverIdle.sh)
-```
-
-MJJ 们估计会喜欢这个。感谢脚本作者 @Ansen
-
-默认执行下面的命令，当然肯定没法覆盖所有的需求。  
-比如 AMD 没有 2G 内存，也没有浪费内存的要求。  
-所以依然建议各位自己安装，也是非常便捷迅速的。
+*I love you, but do not stop my machine, could you?*
 
 ## Usage
 
-从 Release 下载可执行文件。注意区分 amd64 和 arm64。
+Download the executable from Releases and choose the correct build for your platform, such as `amd64` or `arm64`.
 
-在服务器上启动一个 screen，然后执行本程序，用法自己搜。
+Run it inside a `screen` session or another terminal multiplexer if you want it to keep running after you disconnect.
 
-命令参数：
-
-```shell
-./NeverIdle -cp 0.15 -m 2 -n 4h
+```asciidoc
+2026/03/17 12:00:00 INFO  : noidle 0.2.3 - Getting worse from here
+2026/03/17 12:00:00 INFO  : Platform: linux, amd64, go1.25.0
+2026/03/17 12:00:00 INFO  : GitHub: https://github.com/by275/NeverIdle
+2026/03/17 12:00:00 PRIOR : Use the worst priority by default.
+  -c duration
+        Interval for CPU waste
+  -cp float
+        Target CPU waste ratio between 0 and 1
+  -m int
+        GiB of memory waste
+  -n duration
+        Interval for network speed test
+  -p int
+        Set process priority value (default 666)
+  -t int
+        Set concurrent connections for network speed test (default 10)
+2026/03/17 12:00:00 MEM   : Reserving 2 GiB in the background until shutdown
+2026/03/17 12:00:00 CPU   : Maintaining background CPU occupancy with target ratio 0.15
+2026/03/17 12:00:00 NET   : Starting network speed testing with interval 4h0m0s
+2026/03/17 12:00:00 INFO  : noidle is running, press Ctrl+C to stop
 ```
 
-其中：
+Command arguments:
 
--c 指启用 CPU 定期浪费，后面跟随每次浪费的间隔时间。  
-如每 12 小时 23 分钟 34 秒浪费一次，则为 `-c 12h23m34s`。按照格式填。
+```shell
+./noidle -cp 0.15 -m 2 -n 4h
+```
 
--cp 指启用粗粒度的 CPU 浪费控制，浪费率将随机器的使用水平实时变化。  
-该值是 [0, 1] 范围内的比例值。例如希望额外占用 20% CPU，可使用 `-cp 0.2`。注意不要和 `-c` 一起使用。
+Flags:
 
--m 指启用浪费的内存量，后面是一个数字，单位为 GiB。  
-启动后会占用对应量的内存，并且保持不会释放，直到手动杀死进程。
+`-c` enables periodic CPU load generation.  
+For example, to burn CPU every 12 hours, 23 minutes, and 34 seconds, use `-c 12h23m34s`.
 
--n 指启用网络定期浪费，后面跟随每次浪费的间隔时间。  
-格式同 CPU。会定期执行一次 Ookla Speed Test（还会输出结果哦！）
+`-cp` enables adaptive CPU load control.  
+The value is a ratio in the range `[0, 1]`. For example, use `-cp 0.2` to target roughly 20% additional CPU usage. Do not use it together with `-c`.
 
--t 指设置网络定期浪费的并发连接数。  
-默认为10个，值越大消耗的资源越多，一般情况不需要更改。
+`-m` reserves memory in GiB.  
+After startup, the specified amount of memory stays allocated until the process exits.
 
--p 指设置该进程优先级，后跟随一个优先级数值。不指定则默认使用本平台的最低优先级。  
-对于 UNIX-like 系统（如 Linux、FreeBSD 和 macOS），数值取值范围为 [-20,19] ，数字越大优先级越低。  
-对于 Windows ，参见 [官方文档](https://learn.microsoft.com/zh-cn/windows/win32/api/processthreadsapi/nf-processthreadsapi-setpriorityclass)。  
-建议不进行指定，默认即为最低优先级，为其它所有进程让路。
-在 Linux 上，默认模式会同时降低 CPU 调度优先级和磁盘 I/O 优先级；在其他 UNIX-like 系统上，只会降低 CPU 调度优先级；在 Windows 上，会调整进程优先级类别。它主要影响 CPU 密集型负载，并可能间接影响网络测速，但不会直接减少 `-m` 持续占用的内存量。
+`-n` enables periodic network usage by running bandwidth tests.  
+The interval format is the same as `-c`. noidle runs Ookla Speedtest on that schedule and prints the results.
 
-*启动该程序后即立刻执行一次你配置的所有功能，可以观察效果。*
+`-t` sets the number of concurrent connections used for network testing.  
+The default is `10`. Higher values consume more resources, and most setups do not need to change it.
+
+`-p` sets the process priority. If omitted, noidle uses the lowest priority available on the current platform.  
+On UNIX-like systems such as Linux, FreeBSD, and macOS, the valid range is `[-20,19]`, and larger numbers mean lower priority.  
+For Windows, see [the official documentation](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setpriorityclass).  
+In most cases, leaving it at the default is the safest option.
+On Linux, the default mode lowers both CPU scheduling priority and disk I/O priority. On other UNIX-like systems, it lowers only CPU scheduling priority. On Windows, it changes the process priority class. This mainly affects CPU-heavy work and can indirectly affect network tests, but it does not reduce the memory reserved by `-m`.
+
+All enabled features run once immediately at startup, so you can confirm that your settings are working.
+
+## Docker
+
+You can also run noidle with Docker Compose:
+
+```yaml
+services:
+  noidle:
+    image: ghcr.io/by275/neveridle
+    container_name: noidle
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "1024k"
+        max-file: "5"
+    command: "-cp 0.15 -m 2 -n 4h"
+```
+
+The published image still uses the existing registry path `ghcr.io/by275/neveridle` for compatibility.
+
+## Reference
+
+### [OCI Idle Compute Instances](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm)
+
+### Reclamation of Idle Compute Instances
+
+Idle Always Free compute instances may be reclaimed by Oracle. Oracle will deem virtual machine and bare metal compute instances as idle if, during a 7-day period, the following are true:
+
+- CPU utilization for the 95th percentile is less than 20%
+- Network utilization is less than 20%
+- Memory utilization is less than 20% (applies to [A1 shapes](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm#Details_of_the_Always_Free_Compute_instance__a1_flex) only)
