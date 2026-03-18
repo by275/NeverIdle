@@ -1,4 +1,4 @@
-module github.com/by275/neveridle
+module github.com/by275/noidle
 
 go 1.25.0
 

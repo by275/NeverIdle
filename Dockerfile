@@ -2,15 +2,14 @@ ARG ALPINE_VER=3.23
 
 FROM alpine:${ALPINE_VER} AS alpine
 FROM golang:alpine${ALPINE_VER} AS golang
-RUN apk add --no-cache git && \
-    go build -trimpath -ldflags="-s -w -buildid=" -o /go/bin/noidle github.com/by275/neveridle
+RUN go install github.com/by275/noidle@latest
 
 FROM alpine
 LABEL maintainer="by275"
-LABEL org.opencontainers.image.source=https://github.com/by275/NeverIdle
+LABEL org.opencontainers.image.source=https://github.com/by275/noidle
 
 RUN apk add --no-cache tini
-COPY --from=golang /go/bin/noidle /usr/local/bin/noidle
+COPY --from=golang /go/bin/noidle /usr/local/bin/
 
 # environment settings
 ENV LANG=C.UTF-8 \

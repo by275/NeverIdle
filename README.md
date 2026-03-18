@@ -11,7 +11,7 @@ Run it inside a `screen` session or another terminal multiplexer if you want it 
 ```asciidoc
 2026/03/17 12:00:00 INFO  : noidle 0.2.3 - Getting worse from here
 2026/03/17 12:00:00 INFO  : Platform: linux, amd64, go1.25.0
-2026/03/17 12:00:00 INFO  : GitHub: https://github.com/by275/NeverIdle
+2026/03/17 12:00:00 INFO  : GitHub: https://github.com/by275/noidle
 2026/03/17 12:00:00 PRIOR : Use the worst priority by default.
   -c duration
         Interval for CPU waste
@@ -69,7 +69,7 @@ You can also run noidle with Docker Compose:
 ```yaml
 services:
   noidle:
-    image: ghcr.io/by275/neveridle
+    image: ghcr.io/by275/noidle
     container_name: noidle
     restart: always
     security_opt:
@@ -81,8 +81,6 @@ services:
         max-file: "5"
     command: "-cp 0.15 -m 2 -n 4h"
 ```
-
-The published image still uses the existing registry path `ghcr.io/by275/neveridle` for compatibility.
 
 ## Reference
 

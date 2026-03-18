@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 	"time"
 
-	"github.com/by275/neveridle/internal/log"
+	"github.com/by275/noidle/internal/log"
 	"golang.org/x/crypto/chacha20"
 )
 

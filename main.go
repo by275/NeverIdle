@@ -8,9 +8,9 @@ import (
 	"os/signal"
 	"runtime"
 
-	"github.com/by275/neveridle/controller"
-	"github.com/by275/neveridle/internal/log"
-	"github.com/by275/neveridle/waste"
+	"github.com/by275/noidle/controller"
+	"github.com/by275/noidle/internal/log"
+	"github.com/by275/noidle/waste"
 	"github.com/shirou/gopsutil/v3/mem"
 )
 
@@ -49,7 +49,7 @@ func main() {
 func printBanner() {
 	log.Logf("INFO", "noidle %s - Getting worse from here", Version)
 	log.Logf("INFO", "Platform: %s, %s, %s", runtime.GOOS, runtime.GOARCH, runtime.Version())
-	log.Logf("INFO", "GitHub: https://github.com/by275/NeverIdle")
+	log.Logf("INFO", "GitHub: https://github.com/by275/noidle")
 }
 
 func applyPriority() {

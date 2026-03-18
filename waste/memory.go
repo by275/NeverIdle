@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 	"sync"
 
-	"github.com/by275/neveridle/internal/log"
+	"github.com/by275/noidle/internal/log"
 )
 
 const (

@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/by275/neveridle/internal/log"
+	"github.com/by275/noidle/internal/log"
 	"github.com/showwin/speedtest-go/speedtest"
 )
 

@@ -3,7 +3,7 @@ package controller
 import (
 	"time"
 
-	"github.com/by275/neveridle/internal/log"
+	"github.com/by275/noidle/internal/log"
 	"go.einride.tech/pid"
 )
 
